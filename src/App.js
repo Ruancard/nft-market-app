@@ -18,7 +18,7 @@ const NFTMarketplaceApp = () => {
   const [NFTsForSale, setNFTsForSale] = useState(null);
 
   // ⚠️ SUBSTITUA PELO SEU ENDEREÇO DE CONTRATO DEPLOYADO NA SEPOLIA
-  const CONTRACT_ADDRESS = "0xA28F7d77C5C99Cec44B399e0f7C182fcee25d099"; // COLE SEU ENDEREÇO AQUI
+  const CONTRACT_ADDRESS = "0x6160D0Ca6ad8AA9Cc68d143D01591d8050b7dD9f"; // COLE SEU ENDEREÇO AQUI
   
   // ABI do seu contrato NFT Marketplace
   const CONTRACT_ABI = [
