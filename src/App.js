@@ -18,14 +18,14 @@ const NFTMarketplaceApp = () => {
   const [NFTsForSale, setNFTsForSale] = useState(null);
 
   // ⚠️ SUBSTITUA PELO SEU ENDEREÇO DE CONTRATO DEPLOYADO NA SEPOLIA
-  const CONTRACT_ADDRESS = "0x7eb82857593ff1fE080a9a519585a5Eb5E6EFfC3"; // COLE SEU ENDEREÇO AQUI
+  const CONTRACT_ADDRESS = "0xA28F7d77C5C99Cec44B399e0f7C182fcee25d099"; // COLE SEU ENDEREÇO AQUI
   
   // ABI do seu contrato NFT Marketplace
   const CONTRACT_ABI = [
     "function createNFT(string name, uint256 price, string memory contentURI) public",
     "function toggleNFTForSale(uint256 tokenId) public",
     "function buyNFT(uint256 tokenId) public payable",
-    "function getNFTData(uint256 tokenId) public view returns (uint256 tokenId, string name, uint256 price)",
+    "function getNFTPrice(uint256 tokenId) public view returns (uint256 price)",
     "function getMyNFTs() public view returns (tuple(uint256 tokenId, string name, address owner, uint256 price, bool isForSale, string contentURI)[])",
     "function getNFTsForSale() public view returns(tuple(uint256 tokenId, string name, uint256 price)[])"
   ];
@@ -128,6 +128,8 @@ const executeTransaction = async (method, params = [], value = '0') => {
       throw err;
   } 
   finally {
+      getMyNFTs();
+      getNFTsForSale();
       setLoading(false);
   }
 };
@@ -220,9 +222,10 @@ const buyNFT = async () => {
   }
   try {
     // Primeiro buscar o preço do NFT
-    const nft = await getNFTData(buyTokenId);
+    const price = await getNFTPrice(buyTokenId);
     const { ethers } = await import('https://cdn.skypack.dev/ethers@5.7.2');
-    const priceInEth = ethers.utils.formatEther(nft.price);
+    const priceInEth = ethers.utils.formatEther(price);
+    console.log(priceInEth)
     await executeTransaction('buyNFT', [parseInt(buyTokenId)], priceInEth);
     setBuyTokenId('');
     await getBalance(account);
@@ -233,8 +236,8 @@ const buyNFT = async () => {
 };
 
 // Buscar dados do NFT
-const getNFTData = async (id) => {
-   try {
+const getNFTPrice = async (id) => {
+  try {
     setLoading(true);
     
     if (!window.ethereum) {
@@ -249,13 +252,9 @@ const getNFTData = async (id) => {
     const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
     
     // Chamar a função getNFT do contrato
-    const result = await contract.getNFTData(parseInt(id));
-    console.log(result)
-    return {
-      tokenId: result[0].toString(),
-      name: result[1],
-      price: result[2].toString(),
-    };
+    const price = await contract.getNFTPrice(parseInt(id));
+    const result = (price.toString());
+    return result;
   } 
   catch (err) {
     console.error('Erro ao buscar NFT:', err);
